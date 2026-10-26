@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EdgeSight – Serverless Computer Vision in Your Browser</title>
+<style>
+:root{--bg:#fff;--fg:#14202b;--mut:#5b6b7a;--card:#f2f6fa;--ac:#0b6bcb;--ac2:#ff9900;--bd:#d9e2ec;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e141b;--fg:#e8eef4;--mut:#9fb0c0;--card:#17212c;--ac:#5aa9ff;--bd:#263445;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e141b;--fg:#e8eef4;--mut:#9fb0c0;--card:#17212c;--ac:#5aa9ff;--bd:#263445;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.w{max-width:960px;margin:0 auto;padding:0 20px}
+header{padding:64px 0 32px}
+.tag{display:inline-block;background:var(--card);border:1px solid var(--bd);border-radius:99px;padding:4px 12px;font-size:13px;color:var(--mut)}
+h1{font-size:clamp(34px,7vw,56px);line-height:1.1;margin:16px 0 12px}
+h1 span{color:var(--ac)}
+p.lead{font-size:19px;color:var(--mut);max-width:640px}
+.btn{display:inline-block;background:var(--ac);color:#fff;padding:11px 20px;border-radius:8px;text-decoration:none;font-weight:600;margin-top:12px}
+h2{font-size:26px;margin:48px 0 16px}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.c{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:18px}
+.c h3{margin:0 0 6px;font-size:17px}.c p{margin:0;color:var(--mut);font-size:15px}
+.demo{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:18px}
+.row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:14px}
+.row label{font-size:14px;color:var(--mut)}
+select,input[type=file]{background:var(--bg);color:var(--fg);border:1px solid var(--bd);border-radius:6px;padding:6px}
+.cv{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+canvas{width:100%;height:auto;border-radius:8px;background:#000}
+.arch{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.arch .n{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:8px 14px;font-size:14px}
+.arch .a{color:var(--ac2);font-weight:700}
+footer{margin:56px 0 32px;color:var(--mut);font-size:14px;border-top:1px solid var(--bd);padding-top:20px}
+</style>
+</head>
+<body>
+<div class="w">
+<header>
+  <span class="tag">OpenCV AI Competition 2026 · powered by AWS</span>
+  <h1>Edge<span>Sight</span></h1>
+  <p class="lead">Computer vision that runs entirely in your browser. No uploads, no servers to manage, no waiting. Hosted as a static site on AWS.</p>
+  <a class="btn" href="#demo">Try the live demo</a>
+</header>
+
+<h2>The problem</h2>
+<p>Most computer vision tools need a GPU server, a paid API, or a fast internet link. Students, small clinics, farms and schools in low-connectivity regions often have none of these, and sending photos to a remote server also raises privacy concerns.</p>
+
+<h2>Our solution</h2>
+<div class="g">
+  <div class="c"><h3>Runs on the device</h3><p>Image processing happens on the user's own browser, so photos never leave their device.</p></div>
+  <div class="c"><h3>Serverless by design</h3><p>Just static files on Amazon S3 behind CloudFront. Nothing to patch, scale or keep running.</p></div>
+  <div class="c"><h3>OpenCV-style pipeline</h3><p>Grayscale, blur, edge detection and thresholding, the core building blocks of vision apps.</p></div>
+  <div class="c"><h3>Works offline</h3><p>Once loaded, the tool keeps working with no connection at all.</p></div>
+</div>
+
+<h2 id="demo">Live demo</h2>
+<div class="demo">
+  <div class="row">
+    <input type="file" id="f" accept="image/*">
+    <label>Filter
+      <select id="m">
+        <option value="edges">Edge detection (Sobel)</option>
+        <option value="gray">Grayscale</option>
+        <option value="blur">Gaussian-style blur</option>
+        <option value="thresh">Threshold</option>
+        <option value="invert">Invert</option>
+      </select>
+    </label>
+    <label>Strength <input type="range" id="s" min="1" max="255" value="100"></label>
+  </div>
+  <div class="cv"><canvas id="a" width="480" height="320"></canvas><canvas id="b" width="480" height="320"></canvas></div>
+  <p id="info" style="color:var(--mut);font-size:14px;margin:10px 0 0">Choose a photo to begin. A sample image is shown until then.</p>
+</div>
+
+<h2>Architecture</h2>
+<div class="arch">
+  <span class="n">Browser (HTML + JS)</span><span class="a">→</span>
+  <span class="n">Amazon CloudFront</span><span class="a">→</span>
+  <span class="n">Amazon S3 static hosting</span>
+</div>
+<p style="color:var(--mut)">All vision processing is done client-side, so there is no backend, database or physical server to run.</p>
+
+<h2>Where it can go next</h2>
+<div class="g">
+  <div class="c"><h3>Plant leaf checks</h3><p>Spot colour and shape changes in crop leaves.</p></div>
+  <div class="c"><h3>Document scanning</h3><p>Detect page edges and clean up phone photos.</p></div>
+  <div class="c"><h3>Classroom tool</h3><p>Teach image processing visually, with no setup.</p></div>
+</div>
+
+<footer>EdgeSight · Built for the OpenCV AI Competition 2026 · Static site, privacy first.</footer>
+</div>
+
+<script>
+const A=document.getElementById('a'),B=document.getElementById('b'),
+ca=A.getContext('2d'),cb=B.getContext('2d'),
+sel=document.getElementById('m'),sl=document.getElementById('s'),info=document.getElementById('info');
+let img=null;
+function sample(){
+  ca.fillStyle='#1e6fd0';ca.fillRect(0,0,480,320);
+  ca.fillStyle='#ffb020';ca.beginPath();ca.arc(160,150,80,0,7);ca.fill();
+  ca.fillStyle='#e8eef4';ca.fillRect(270,70,150,170);
+  ca.fillStyle='#2a9d5c';ca.beginPath();ca.moveTo(60,300);ca.lineTo(200,220);ca.lineTo(340,300);ca.fill();
+}
+function draw(){
+  if(img){const r=Math.min(480/img.width,320/img.height),w=img.width*r,h=img.height*r;
+    ca.fillStyle='#000';ca.fillRect(0,0,480,320);ca.drawImage(img,(480-w)/2,(320-h)/2,w,h);}
+  else sample();
+  const src=ca.getImageData(0,0,480,320),d=src.data,W=480,H=320,t=+sl.value,m=sel.value;
+  const g=new Float32Array(W*H);
+  for(let i=0;i<W*H;i++)g[i]=.299*d[4*i]+.587*d[4*i+1]+.114*d[4*i+2];
+  const out=cb.createImageData(W,H),o=out.data;
+  let gb=g;
+  if(m==='blur'){const k=Math.max(1,Math.round(t/25));gb=new Float32Array(W*H);
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++){let s=0,n=0;
+      for(let j=-k;j<=k;j+=1)for(let i=-k;i<=k;i+=2){const xx=x+i,yy=y+j;if(xx>=0&&xx<W&&yy>=0&&yy<H){s+=g[yy*W+xx];n++}}
+      gb[y*W+x]=s/n}}
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    const p=y*W+x;let v;
+    if(m==='edges'){
+      if(x<1||y<1||x>=W-1||y>=H-1)v=0;else{
+      const gx=-g[p-W-1]+g[p-W+1]-2*g[p-1]+2*g[p+1]-g[p+W-1]+g[p+W+1];
+      const gy=-g[p-W-1]-2*g[p-W]-g[p-W+1]+g[p+W-1]+2*g[p+W]+g[p+W+1];
+      v=Math.min(255,Math.hypot(gx,gy)*(t/100))}}
+    else if(m==='thresh')v=g[p]>t?255:0;
+    else if(m==='gray'||m==='blur')v=gb[p];
+    else{o[4*p]=255-d[4*p];o[4*p+1]=255-d[4*p+1];o[4*p+2]=255-d[4*p+2];o[4*p+3]=255;continue}
+    o[4*p]=o[4*p+1]=o[4*p+2]=v;o[4*p+3]=255}
+  cb.putImageData(out,0,0);
+}
+document.getElementById('f').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const i=new Image();i.onload=()=>{img=i;draw();info.textContent='Processed locally in your browser. Nothing was uploaded.'};
+  i.src=URL.createObjectURL(f)};
+sel.onchange=sl.oninput=draw;
+draw();
+</script>
+</body>
+</html>
